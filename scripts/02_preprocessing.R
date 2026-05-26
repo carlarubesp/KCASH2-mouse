@@ -78,9 +78,12 @@ metadata_clean <- metadata[metadata$sample %in% colnames(counts_clean), ]
 cat("Samples after outlier removal:", ncol(counts_clean), "\n")
 print(table(metadata_clean$genotype, metadata_clean$tissue))
 
+# Create clean data directory if it doesn't exist
+dir.create("data/clean", showWarnings = FALSE)
+
 # Save clean data
-write.csv(counts_clean, "data/filtered_counts_clean.csv")
-write.csv(metadata_clean, "data/metadata_clean.csv")
+write.csv(counts_clean, "data/clean/filtered_counts_clean.csv")
+write.csv(metadata_clean, "data/clean/metadata_clean.csv")
 
 # PCA after outlier removal
 dds_clean <- DESeqDataSetFromMatrix(
