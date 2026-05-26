@@ -1,4 +1,6 @@
-# Environment setup and package installation
+# ==============================================================================
+# SCRIPT 01: Environment setup and package installation
+# ==============================================================================
 
 # Install BiocManager
 if (!require("BiocManager", quietly = TRUE)) {
@@ -8,6 +10,7 @@ if (!require("BiocManager", quietly = TRUE)) {
 # Packages
 packages <- c(
   "jsonlite",
+  "readxl",
   "DESeq2",
   "edgeR",
   "clusterProfiler",
@@ -23,4 +26,4 @@ packages <- c(
 )
 
 BiocManager::install(packages, update = FALSE)
-print("Setup successfully completed! All required packages are installed.")
+print("All required packages are installed.")
