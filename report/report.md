@@ -43,3 +43,22 @@ The packages installed for the analysis are:
 &nbsp;
 
 ## 2. Data Preprocessing and Quality Assessment
+
+### Methods & DEGs Summary
+
+Differential expression analysis was performed using the cleaned RNA-seq count matrix and the corresponding sample metadata. The count matrix contained gene-level read counts, while the metadata described the sample type, tissue condition, genotype, and animal ID for each sample. The cleaned dataset was generated during preprocessing and used as input for all differential expression comparisons.
+
+The analysis was performed with DESeq2. For each comparison, the count matrix was subset to the relevant sample groups based on the metadata column `type`. The comparisons T_KO vs T_WT and N_KO vs N_WT were analyzed using an unpaired design with `type` as the explanatory variable. These comparisons evaluate the effect of KCASH2 knockout within tumor tissue and normal tissue, respectively.
+
+The comparisons T_KO vs N_KO and T_WT vs N_WT were analyzed using a paired design. For these comparisons, only animals with both tumor and normal samples were retained. Animal ID was included as a blocking factor in the DESeq2 design to account for baseline expression differences between individual mice. This resulted in 6 complete KO pairs and 5 complete WT pairs.
+
+Differentially expressed genes were extracted using the thresholds padj < 0.05 and |log2FC| ≥ 1. Genes with a positive log2 fold change were counted as upregulated in the first group of the comparison, while genes with a negative log2 fold change were counted as downregulated in the first group.
+
+| Comparison   | Design                       | Upregulated DEGs | Downregulated DEGs | Total DEGs |
+| ------------ | ---------------------------- | ---------------: | -----------------: | ---------: |
+| T_KO vs T_WT | unpaired                     |                0 |                  0 |          0 |
+| N_KO vs N_WT | unpaired                     |                1 |                  1 |          2 |
+| T_KO vs N_KO | paired, blocked by animal ID |             1306 |               1146 |       2452 |
+| T_WT vs N_WT | paired, blocked by animal ID |             1726 |               1497 |       3223 |
+
+The KO vs WT comparisons showed few or no differentially expressed genes, whereas the paired tumor vs normal comparisons showed substantially larger DEG sets. Overall, the strongest transcriptomic differences were observed between tumor and normal tissue within the same genotype.
