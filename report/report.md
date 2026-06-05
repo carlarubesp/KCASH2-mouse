@@ -1,13 +1,55 @@
 # KCASH2 Mouse RNA-seq Analysis — Report
 
 ## **Status:** work in progress (added to the readme &)
-- [ ] Project overview
-- [ ] Study design
+- [x] Project overview
+- [x] Study design
 - [ ] Aims, which questions are we making about this project.
 - [x] Environment setup
 - [ ] Data Preprocessing and Quality Assessment
 - [ ] Differential expression analysis
 - [ ] GO and pathway analysis
+
+## Project Overview
+
+### Background
+
+The *KCASH2* gene acts as a tumor suppressor and plays a critical role in colorectal cancer, primarily by negatively regulating the Hedgehog (Hh) signaling pathway. While its biochemical function is documented, understanding how the loss of this gene globally affects the cellular transcriptome is essential to uncover its underlying mechanisms in tumor development and progression.
+
+### Objective
+This project aims to investigate the transcriptomic impact of *KCASH2* using an in vivo mouse model. Specifically, we analyze RNA-sequencing (RNA-seq) data to identify Differentially Expressed Genes (DEGs) and altered biological pathways. The study evaluates expression profiles across two main dimensions: tissue condition (Tumor vs. Normal) and genetic background (Wild Type [WT] vs. *KCASH2* Knockout [KO]).
+
+&nbsp;
+
+## Study Design
+
+The experimental design of this study is structured to evaluate the transcriptomic changes driven by both tumor development and the genetic deletion of *KCASH2*.
+
+### Experimental model and sample collection
+
+The study utilizes a genetically modified mouse model, divided into two distinct genotype groups:
+* **WT (Wild-Type)**: Mice with normal KCASH2 expression.
+* **KO (Knockout)**: Mice genetically engineered to lack KCASH2 expression.
+
+From these animals, two types of tissue samples were harvested for bulk RNA-sequencing: **Tumor tissue (T)** and adjacent **Normal tissue (N)**.
+
+### Paired strategy and sample size
+
+A major strength of this study design is its paired nature. Whenever possible, both tumor and normal tissues were extracted from the exact same animal. This allows us to control for inter-individual genetic background noise (baseline variability between different mice), significantly increasing the statistical power of the analysis.
+
+After initial quality control and the removal of technical outliers, the refined dataset used for the core paired analyses consists of **11 complete animal pairs** (6 complete KO pairs and 5 complete WT pairs), yielding a robust dataset for differential expression modeling.
+
+### Statistical contrasts
+
+Based on this sample structure, the study is designed to explore two main biological axes:
+1. The Genotype Effect (Unpaired Analysis): Evaluating how the absence of KCASH2 alters gene expression within a specific tissue environment.
+    * Tumor KO vs. Tumor WT (T_KO vs. T_WT)
+    * Normal KO vs. Normal WT (N_KO vs. N_WT)
+
+2. The Tumorigenesis Effect (Paired Analysis): Evaluating the transcriptomic shift from healthy to tumor tissue, utilizing the animal ID as a blocking factor to isolate the disease effect.
+    * Tumor KO vs. Normal KO (T_KO vs. N_KO)
+    * Tumor WT vs. Normal WT (T_WT vs. N_WT)
+
+&nbsp;
 
 ## 1. Environment Setup
 
@@ -27,7 +69,7 @@ The packages installed for the analysis are:
 |---|---|---|
 | **jsonlite** | CRAN | Parsing and handling JSON files; used for reading configuration and metadata files |
 | **readxl** | CRAN | Reading Excel files (.xlsx) into R |
-| **DESeq2** | Bioconductor | Main tool for differential gene expression analysis |
+| **DESeq2** | Bioconductor | Main tool for differential gene expressionproj analysis |
 | **edgeR** | Bioconductor | Used here for gene filtering (`filterByExpr`); also used to validate DESeq2 results |
 | **clusterProfiler** | Bioconductor | Gene Ontology (GO) and KEGG pathway enrichment analysis |
 | **org.Mm.eg.db** | Bioconductor | Mouse gene annotation database; maps gene symbols to Entrez IDs |
