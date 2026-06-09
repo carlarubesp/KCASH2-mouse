@@ -5,7 +5,7 @@
 - [x] Study design
 - [ ] Aims, which questions are we making about this project.
 - [x] Environment setup
-- [ ] Data Preprocessing and Quality Assessment
+- [x] Data Preprocessing and Quality Assessment
 - [ ] Differential expression analysis
 - [ ] GO and pathway analysis
 
@@ -19,6 +19,10 @@ The *KCASH2* gene acts as a tumor suppressor and plays a critical role in colore
 This project aims to investigate the transcriptomic impact of *KCASH2* using an in vivo mouse model. Specifically, we analyze RNA-sequencing (RNA-seq) data to identify Differentially Expressed Genes (DEGs) and altered biological pathways. The study evaluates expression profiles across two main dimensions: tissue condition (Tumor vs. Normal) and genetic background (Wild Type [WT] vs. *KCASH2* Knockout [KO]).
 
 &nbsp;
+
+## Research Aims
+
+[TODO]
 
 ## Study Design
 
@@ -51,42 +55,73 @@ Based on this sample structure, the study is designed to explore two main biolog
 
 &nbsp;
 
-## 1. Environment Setup
+## Methods
 
-### 1.1 Package manager
+### Dataset
+
+The input data for this analysis consists of two Excel files:
+* `raw_counts_mouse.xlsx`: a gene-level read count matrix where rows represent genes and columns represent individual samples. Each cell contains the number of sequencing reads mapped to a given gene in a given sample.
+* `metadata_mouse.xlsx`: a sample annotation table describing the experimental group (type: T_KO, T_WT, N_KO, or N_WT), the tissue type (Tumor or Normal), the genotype (KO or WT), and the animal ID used to link paired samples from the same individual.
+
+Samples are identified by IonCode barcodes (e.g., IonCode_0103), consistent with Ion Torrent multiplexed sequencing. Data were provided as pre-computed count tables and no upstream processing (e.g., read alignment or quantification) was performed within this pipeline.
+
+### 1. Environment Setup
+
+#### 1.1 Package manager
 
 All packages are installed using **BiocManager**, the official package manager for Bioconductor, one of the two main R repositories for bioinformatics, specifically designed for genomic data analysis.
 
-Using BiocManager instead of base `install.packages()` ensures that all packages are mutually compatible with the current versions of R and Bioconductor, avoiding version conflicts between CRAN and Bioconductor dependencies. For packages hosted on CRAN, BiocManager calls `install.packages()` internally, so there is no difference in the result — only in the version management.
+Using BiocManager instead of base `install.packages()` ensures that all packages are mutually compatible with the current versions of R and Bioconductor, avoiding version conflicts between CRAN and Bioconductor dependencies. For packages hosted on CRAN, BiocManager calls `install.packages()` internally, so there is no difference in the result, only in the version management.
 
 This analysis uses **R version 4.6.0** and **Bioconductor version 3.23**.
 
-### 1.2 Packages
+#### 1.2 Packages
 
 The packages installed for the analysis are:
 
 | Package | Repository | Purpose |
-|---|---|---|
-| **jsonlite** | CRAN | Parsing and handling JSON files; used for reading configuration and metadata files |
+|----------|------------|---------|
 | **readxl** | CRAN | Reading Excel files (.xlsx) into R |
-| **DESeq2** | Bioconductor | Main tool for differential gene expressionproj analysis |
-| **edgeR** | Bioconductor | Used here for gene filtering (`filterByExpr`); also used to validate DESeq2 results |
+| **readr** | CRAN | Reading and writing CSV files |
+| **dplyr** | CRAN | Data manipulation and filtering |
+| **tidyr** | CRAN | Reshaping data frames for analysis and plotting |
+| **stringr** | CRAN | String manipulation, used for formatting text in enrichment plots |
+| **DESeq2** | Bioconductor | Main tool for differential gene expression analysis |
+| **edgeR** | Bioconductor | Used strictly for filtering low-expression genes (`filterByExpr`) prior to modeling |
 | **clusterProfiler** | Bioconductor | Gene Ontology (GO) and KEGG pathway enrichment analysis |
 | **org.Mm.eg.db** | Bioconductor | Mouse gene annotation database; maps gene symbols to Entrez IDs |
-| **AnnotationDbi** | Bioconductor | Interface for querying annotation databases such as org.Mm.eg.db |
+| **AnnotationDbi** | Bioconductor | Interface for querying annotation databases such as `org.Mm.eg.db` |
+| **enrichplot** | Bioconductor | Visualization methods for `clusterProfiler` enrichment results |
 | **EnhancedVolcano** | Bioconductor | Volcano plots for differential expression results |
 | **pheatmap** | CRAN | Clustered heatmaps for visualising expression patterns |
 | **ggplot2** | CRAN | General-purpose data visualisation |
-| **dplyr** | CRAN | Data manipulation and filtering |
-| **tidyr** | CRAN | Reshaping data frames for analysis and plotting |
 | **RColorBrewer** | CRAN | Colour palettes for figures |
-| **sva** | Bioconductor | Batch effect detection and correction |
 
 &nbsp;
 
-## 2. Data Preprocessing and Quality Assessment
+### 2. Data Preprocessing and Quality Assessment
 
-### Methods & DEGs Summary
+#### Data loading and alignment
+
+Raw count data and sample metadata were imported from Excel using the `readxl package`. Metadata columns for tissue type, genotype, and animal ID were derived from the `type` column and stored as factors. The sample order in the count matrix was verified and, where necessary, the metadata was reordered to ensure row-by-column alignment between the two tables.
+
+#### Low-expression gene filtering
+
+Genes with very low or near-zero counts across all samples were removed prior to statistical modeling to reduce noise and improve multiple-testing correction power. Filtering was applied using the `filterByExpr()` function from the `edgeR` package, with genotype as the grouping variable. This function retains genes that have at least a minimum count threshold in a number of samples no smaller than the smallest experimental group.
+
+#### Principal Component Analysis (PCA) and outlier identification.
+
+Sample-level quality was assessed using PCA. Count data were first transformed using the Variance Stabilizing Transformation (VST) implemented in DESeq2 (`vst()`, `blind = TRUE`), which stabilizes the variance across the range of counts independently of any experimental design. PCA was then computed on the transformed values using `plotPCA()`, and samples were plotted on the first two principal components, colored by tissue type and shaped by genotype.
+
+Two samples (`IonCode_0103` and `IonCode_0105`) were identified as technical outliers. These samples had substantially lower sequencing depth (approximately 3–4 million reads) compared to the rest of the dataset (approximately 12–18 million reads per sample), and they clustered away from other samples of their respective experimental group on the PCA plot. Both samples were excluded from all downstream analyses.
+
+#### Post-removal quality check.
+
+PCA was repeated on the cleaned dataset to confirm that, after outlier removal, samples clustered consistently by tissue type along the first principal component, as expected for a bulk RNA-seq dataset where the tissue of origin is the primary source of variation. The cleaned count matrix and metadata were saved as CSV files in `data/clean/` for use in all subsequent steps.
+
+### 3. Differential expression analysis
+
+#### Methods & DEGs Summary
 
 Differential expression analysis was performed using the cleaned RNA-seq count matrix and the corresponding sample metadata. The count matrix contained gene-level read counts, while the metadata described the sample type, tissue condition, genotype, and animal ID for each sample. The cleaned dataset was generated during preprocessing and used as input for all differential expression comparisons.
 
@@ -106,7 +141,7 @@ Differentially expressed genes were extracted using the thresholds padj < 0.05 a
 The KO vs WT comparisons showed few or no differentially expressed genes, whereas the paired tumor vs normal comparisons showed substantially larger DEG sets. Overall, the strongest transcriptomic differences were observed between tumor and normal tissue within the same genotype.
 
 
-## Functional Enrichment Analysis and Biological Interpretation
+#### Functional Enrichment Analysis and Biological Interpretation
 
 To better understand the biological relevance of the differentially expressed genes, functional enrichment analysis was performed using the DEG lists obtained from the differential expression analysis. DEGs were defined using the thresholds `padj < 0.05` and `|log2FC| ≥ 1`. Since the direct genotype comparisons, `T_KO vs T_WT` and `N_KO vs N_WT`, did not produce significant DEGs under these criteria, the enrichment analysis was mainly focused on the paired tumor-versus-normal comparisons: `T_KO vs N_KO paired` and `T_WT vs N_WT paired`.
 
@@ -127,4 +162,8 @@ Interestingly, the targeted pathway analysis showed stronger evidence for Wnt/β
 Overall, the functional analysis suggests that the main biological signal in the dataset is associated with tumor-versus-normal differences rather than with a broad KCASH2 genotype effect. The WT tumor-versus-normal comparison showed the largest DEG set and the strongest functional enrichment, while the KO tumor-versus-normal comparison produced a smaller DEG set and more limited enrichment results. Although `Ptch2` and `Shh` were altered in the WT tumor-versus-normal comparison, Hedgehog signaling was not significantly enriched as a complete pathway. Therefore, the role of Hedgehog in this dataset should be interpreted cautiously.
 
 Taken together, these results indicate that tumor development is associated with changes in metabolism, transport, xenobiotic response, lipid-related processes, and cancer-associated signaling pathways. The data do not strongly support a global transcriptional activation of Hedgehog signaling due to KCASH2 loss. Instead, KCASH2-related effects, if present, may be more subtle, context-dependent, or detectable at levels not fully captured by bulk RNA-seq, such as protein regulation, post-transcriptional mechanisms, or cell-type-specific changes.
+
+### 4. Visualization
+
+[TODO]
 

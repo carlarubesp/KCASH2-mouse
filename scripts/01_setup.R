@@ -2,28 +2,31 @@
 # SCRIPT 01: Environment setup and package installation
 # ==============================================================================
 
-# Install BiocManager
+# Install BiocManager if it's not already installed
 if (!require("BiocManager", quietly = TRUE)) {
     install.packages("BiocManager")
 }
 
-# Packages
+# List of required packages based on the analysis scripts
 packages <- c(
-  "jsonlite",
   "readxl",
+  "readr",
+  "dplyr",
+  "tidyr",
+  "stringr",
   "DESeq2",
   "edgeR",
   "clusterProfiler",
   "org.Mm.eg.db",
   "AnnotationDbi",
+  "enrichplot",
   "EnhancedVolcano",
   "pheatmap",
   "ggplot2",
-  "dplyr",
-  "tidyr",
-  "RColorBrewer",
-  "sva"
+  "RColorBrewer"
 )
 
+# Install packages using BiocManager
 BiocManager::install(packages, update = FALSE)
-print("All required packages are installed.")
+
+print("All required packages are successfully installed.")
