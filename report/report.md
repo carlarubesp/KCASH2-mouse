@@ -1,14 +1,5 @@
 # KCASH2 Mouse RNA-seq Analysis — Report
 
-## **Status:** work in progress (added to the readme &)
-- [x] Project overview
-- [x] Study design
-- [ ] Aims, which questions are we making about this project.
-- [x] Environment setup
-- [x] Data Preprocessing and Quality Assessment
-- [ ] Differential expression analysis
-- [ ] GO and pathway analysis
-
 ## Project Overview
 
 ### Background
@@ -22,7 +13,16 @@ This project aims to investigate the transcriptomic impact of *KCASH2* using an 
 
 ## Research Aims
 
-[TODO]
+This project was designed to answer the following research questions:
+
+1. Does the loss of `KCASH2` produce detectable transcriptomic differences between KO and WT mice within the same tissue type?
+2. Which genes are differentially expressed between tumor and adjacent normal tissue within each genotype?
+3. Does the paired tumor-versus-normal design reveal stronger transcriptional changes than the direct KO-versus-WT comparisons?
+4. Which biological processes and molecular pathways are enriched among the differentially expressed genes?
+5. Are Hedgehog-related genes or Hedgehog-associated pathways altered in tumor tissue?
+6. Does KCASH2 loss produce a detectable pathway-level activation of Hedgehog signaling at the transcriptomic level?
+
+These questions separate two main biological effects: the genotype effect caused by KCASH2 deletion and the tumorigenesis effect observed when tumor tissue is compared with adjacent normal tissue. The final aim is to determine whether the loss of KCASH2 is associated with broad transcriptomic changes and whether these changes support alterations in Hedgehog signaling or other cancer-related pathways.
 
 ## Study Design
 
@@ -65,6 +65,8 @@ The input data for this analysis consists of two Excel files:
 
 Samples are identified by IonCode barcodes (e.g., IonCode_0103), consistent with Ion Torrent multiplexed sequencing. Data were provided as pre-computed count tables and no upstream processing (e.g., read alignment or quantification) was performed within this pipeline.
 
+After quality control and outlier removal, the final dataset used for the paired analyses contained 11 complete tumor-normal animal pairs: 6 KO pairs and 5 WT pairs.
+
 ### 1. Environment Setup
 
 #### 1.1 Package manager
@@ -99,6 +101,20 @@ The packages installed for the analysis are:
 
 &nbsp;
 
+#### 1.3 Analysis settings and cut-offs
+
+Low-expression genes were filtered before differential expression analysis using `edgeR::filterByExpr()`.
+
+Differential expression analysis was performed with DESeq2. Genes were considered differentially expressed when they satisfied both `padj < 0.05` and `|log2FC| ≥ 1`.
+
+For unpaired genotype comparisons, the model used `type` as the explanatory variable. For paired tumor-versus-normal comparisons, animal ID was included as a blocking factor to control for baseline differences between mice.
+
+GO Biological Process enrichment was performed with `clusterProfiler::enrichGO()` using `ont = "BP"`, Benjamini-Hochberg correction, `pvalueCutoff = 0.05`, and `qvalueCutoff = 0.2`.
+
+KEGG enrichment was performed with `clusterProfiler::enrichKEGG()` using the mouse organism code `mmu`, Benjamini-Hochberg correction, and `pvalueCutoff = 0.05`.
+
+Comparisons with fewer than 10 mapped Entrez IDs were not interpreted for enrichment analysis.
+
 ### 2. Data Preprocessing and Quality Assessment
 
 #### Data loading and alignment
@@ -109,13 +125,13 @@ Raw count data and sample metadata were imported from Excel using the `readxl pa
 
 Genes with very low or near-zero counts across all samples were removed prior to statistical modeling to reduce noise and improve multiple-testing correction power. Filtering was applied using the `filterByExpr()` function from the `edgeR` package, with genotype as the grouping variable. This function retains genes that have at least a minimum count threshold in a number of samples no smaller than the smallest experimental group.
 
-#### Principal Component Analysis (PCA) and outlier identification.
+#### Principal Component Analysis (PCA) and outlier identification
 
 Sample-level quality was assessed using PCA. Count data were first transformed using the Variance Stabilizing Transformation (VST) implemented in DESeq2 (`vst()`, `blind = TRUE`), which stabilizes the variance across the range of counts independently of any experimental design. PCA was then computed on the transformed values using `plotPCA()`, and samples were plotted on the first two principal components, colored by tissue type and shaped by genotype.
 
 Two samples (`IonCode_0103` and `IonCode_0105`) were identified as technical outliers. These samples had substantially lower sequencing depth (approximately 3–4 million reads) compared to the rest of the dataset (approximately 12–18 million reads per sample), and they clustered away from other samples of their respective experimental group on the PCA plot. Both samples were excluded from all downstream analyses.
 
-#### Post-removal quality check.
+#### Post-removal quality check
 
 PCA was repeated on the cleaned dataset to confirm that, after outlier removal, samples clustered consistently by tissue type along the first principal component, as expected for a bulk RNA-seq dataset where the tissue of origin is the primary source of variation. The cleaned count matrix and metadata were saved as CSV files in `data/clean/` for use in all subsequent steps.
 
@@ -141,29 +157,135 @@ Differentially expressed genes were extracted using the thresholds padj < 0.05 a
 The KO vs WT comparisons showed few or no differentially expressed genes, whereas the paired tumor vs normal comparisons showed substantially larger DEG sets. Overall, the strongest transcriptomic differences were observed between tumor and normal tissue within the same genotype.
 
 
-#### Functional Enrichment Analysis and Biological Interpretation
+#### 4. Functional Enrichment Analysis and Biological Interpretation
 
-To better understand the biological relevance of the differentially expressed genes, functional enrichment analysis was performed using the DEG lists obtained from the differential expression analysis. DEGs were defined using the thresholds `padj < 0.05` and `|log2FC| ≥ 1`. Since the direct genotype comparisons, `T_KO vs T_WT` and `N_KO vs N_WT`, did not produce significant DEGs under these criteria, the enrichment analysis was mainly focused on the paired tumor-versus-normal comparisons: `T_KO vs N_KO paired` and `T_WT vs N_WT paired`.
+##### Input DEG lists
 
-Mouse gene symbols were converted into Entrez IDs using the `org.Mm.eg.db` annotation database. These converted gene lists were then used for Gene Ontology Biological Process enrichment and KEGG pathway analysis with `clusterProfiler`. In addition to the standard enrichment analysis, a targeted pathway screen was performed for biological processes directly related to the project hypothesis, especially Hedgehog signaling, Wnt/β-catenin signaling, and inflammation-related pathways.
+Functional enrichment analysis was performed using the DEG lists obtained from the official differential expression analysis. DEGs were defined using the same thresholds applied in the DESeq2 step: `padj < 0.05` and `|log2FC| ≥ 1`.
 
-The number of DEGs differed clearly between the two paired tumor-versus-normal comparisons. The `T_KO vs N_KO paired` comparison produced 34 DEGs, whereas the `T_WT vs N_WT paired` comparison produced 628 DEGs. This indicates that, under the thresholds used in this analysis, the WT tumor-versus-normal comparison showed a broader transcriptional change than the KO tumor-versus-normal comparison. In contrast, the lack of significant DEGs in the direct KO-versus-WT comparisons suggests that KCASH2 loss did not produce a broad transcriptomic effect detectable at the whole-gene-expression level in this dataset.
+The direct genotype comparisons produced no or very few significant DEGs:
 
-In the `T_KO vs N_KO paired` comparison, the most enriched GO Biological Process terms were mainly related to xenobiotic metabolism, unsaturated fatty acid metabolism, icosanoid metabolism, cellular response to xenobiotic stimulus, arachidonic acid metabolism, and organic anion transport. Although this comparison had a relatively small DEG set, these enriched terms suggest that tumor development in the KO background is associated with changes in metabolic and detoxification-related processes.
+* `T_KO vs T_WT`: 0 DEGs
+* `N_KO vs N_WT`: 2 DEGs
 
-The `T_WT vs N_WT paired` comparison showed a broader and stronger functional signal. The top enriched GO terms included organic anion transport, icosanoid metabolic process, regulation of lipid metabolic process, response to xenobiotic stimulus, unsaturated fatty acid metabolism, fatty acid metabolism, steroid metabolism, and carboxylic acid transport. These results suggest major alterations in metabolic, transport, lipid-related, and xenobiotic-response processes in tumor tissue compared with adjacent normal tissue. This is biologically plausible in the intestinal context, where epithelial transport, lipid metabolism, inflammatory mediators, and response to external compounds are closely connected.
+For this reason, the functional analysis focused mainly on the paired tumor-versus-normal comparisons:
 
-KEGG enrichment analysis also supported the presence of metabolic and cancer-related alterations, especially in the WT tumor-versus-normal comparison. Enriched pathways included drug metabolism by cytochrome P450, drug metabolism by other enzymes, serotonergic synapse, signaling pathways regulating pluripotency of stem cells, and cancer-related KEGG terms. These cancer-related KEGG pathways should not be interpreted as evidence for a different cancer type, but rather as the involvement of shared oncogenic genes and signaling modules.
+* `T_KO vs N_KO`: 2452 DEGs
+* `T_WT vs N_WT`: 3223 DEGs
 
-Because the project focuses on the Hedgehog pathway and the possible tumor suppressor role of KCASH2, Hedgehog-related genes were examined in more detail. Two Hedgehog-associated genes, `Ptch2` and `Shh`, were significantly upregulated in the `T_WT vs N_WT paired` comparison. However, the targeted pathway screen showed that Hedgehog signaling as a whole was not significantly enriched after multiple-testing correction. Therefore, the results provide evidence for changes in individual Hedgehog-related genes, but they do not support a strong pathway-level enrichment of Hedgehog signaling under the criteria used here.
+This indicates that the dominant transcriptional signal in the dataset is associated with tumor development rather than with a broad genotype effect of KCASH2 loss.
 
-Interestingly, the targeted pathway analysis showed stronger evidence for Wnt/β-catenin-related signaling. The Wnt-related gene set included several DEGs, such as `Dkk2`, `Fzd10`, `Wnt5b`, `Wnt6`, `Wnt7a`, and `Wnt7b`, and reached statistical significance after correction. This is relevant because Wnt signaling is one of the major pathways involved in colorectal cancer biology. In this dataset, the Wnt-related signal appears more robust than the Hedgehog pathway signal.
+##### Gene ID conversion and enrichment strategy
 
-Overall, the functional analysis suggests that the main biological signal in the dataset is associated with tumor-versus-normal differences rather than with a broad KCASH2 genotype effect. The WT tumor-versus-normal comparison showed the largest DEG set and the strongest functional enrichment, while the KO tumor-versus-normal comparison produced a smaller DEG set and more limited enrichment results. Although `Ptch2` and `Shh` were altered in the WT tumor-versus-normal comparison, Hedgehog signaling was not significantly enriched as a complete pathway. Therefore, the role of Hedgehog in this dataset should be interpreted cautiously.
+Mouse gene symbols were converted into Entrez IDs using the `org.Mm.eg.db` annotation database. These converted gene lists were then used for Gene Ontology Biological Process enrichment and KEGG pathway analysis with `clusterProfiler`.
 
-Taken together, these results indicate that tumor development is associated with changes in metabolism, transport, xenobiotic response, lipid-related processes, and cancer-associated signaling pathways. The data do not strongly support a global transcriptional activation of Hedgehog signaling due to KCASH2 loss. Instead, KCASH2-related effects, if present, may be more subtle, context-dependent, or detectable at levels not fully captured by bulk RNA-seq, such as protein regulation, post-transcriptional mechanisms, or cell-type-specific changes.
+GO enrichment was used to identify overrepresented biological processes, while KEGG enrichment was used to detect altered molecular pathways. In addition, a targeted screen was performed for pathways directly related to the project hypothesis, especially Hedgehog signaling, Wnt/β-catenin signaling, and inflammation-related genes.
 
-### 4. Visualization
+##### GO Biological Process enrichment
 
-[TODO]
+In the `T_KO vs N_KO` comparison, the most enriched GO Biological Process terms were mainly related to:
 
+* chemotaxis;
+* taxis;
+* cell chemotaxis;
+* leukocyte migration;
+* organic anion transport;
+* ameboidal-type cell migration.
+
+These results suggest that tumor development in the KO background is associated with immune-cell recruitment, cell migration, inflammatory signalling, and transport-related processes.
+
+The `T_WT vs N_WT` comparison showed a similar functional pattern. The top enriched GO terms included:
+
+* chemotaxis;
+* taxis;
+* ameboidal-type cell migration;
+* regulation of epithelial cell proliferation;
+* tissue migration;
+* epithelial cell migration.
+
+Overall, the GO results show that both paired tumor-versus-normal comparisons are enriched for processes related to migration, immune response, tissue remodelling, and epithelial behaviour.
+
+##### KEGG pathway enrichment
+
+KEGG enrichment analysis also supported the presence of cancer-relevant and microenvironment-related alterations.
+
+In the `T_KO vs N_KO` comparison, enriched pathways included:
+
+* cytokine-cytokine receptor interaction;
+* viral protein interaction with cytokine and cytokine receptor;
+* pancreatic secretion;
+* ECM-receptor interaction;
+* mineral absorption;
+* rheumatoid arthritis.
+
+These pathway names should not be interpreted literally as different diseases. Instead, they reflect pathway modules involving cytokines, extracellular matrix components, immune response, and tissue remodelling.
+
+In the `T_WT vs N_WT` comparison, KEGG enrichment highlighted pathways such as:
+
+* PI3K-Akt signalling;
+* ECM-receptor interaction;
+* cytokine-cytokine receptor interaction;
+* integrin signalling;
+* Ras signalling;
+* cancer-related KEGG terms.
+
+These pathways are relevant in a tumor context because they are associated with cell survival, proliferation, migration, extracellular matrix remodelling, cytokine signalling, and interaction with the tumor microenvironment.
+
+##### Hedgehog and Wnt targeted analysis
+
+Because the project focuses on the possible tumor suppressor role of KCASH2 and its relationship with Hedgehog signaling, Hedgehog-related genes were examined separately.
+
+In the `T_KO vs N_KO` comparison, `Shh`, `Ptch2`, and `Sufu` were found among the DEGs and were upregulated in tumor tissue. In the `T_WT vs N_WT` comparison, `Shh` and `Ptch2` were also upregulated.
+
+This shows that individual Hedgehog-associated genes change during the tumor-versus-normal transition in both genetic backgrounds. However, the targeted pathway screen did not identify Hedgehog signalling as significantly enriched after multiple-testing correction. Therefore, the results support changes in individual Hedgehog-related genes, but they do not provide strong evidence for global pathway-level enrichment of Hedgehog signalling.
+
+The targeted pathway screen also detected several Wnt/β-catenin-related genes among the DEGs, especially in the tumor-versus-normal comparisons. These included genes such as `Axin2`, `Lef1`, `Wnt7b`, `Wnt5b`, `Fzd10`, `Tcf7`, `Dkk2`, `Dkk3`, `Wnt3`, `Wnt5a`, `Fzd8`, and `Fzd3`. However, after multiple-testing correction, Wnt/β-catenin was not significantly enriched either. Therefore, Wnt-related genes are present among the DEGs, but the pathway-level result should be interpreted cautiously.
+
+##### Functional interpretation
+
+Overall, the functional analysis suggests that the dominant biological signal in this dataset is the tumor-versus-normal transition. The direct KO-versus-WT comparisons showed no or very few DEGs, while both paired tumor-versus-normal comparisons produced large DEG sets and strong functional enrichment.
+
+The enriched GO and KEGG results point mainly to:
+
+* cell migration;
+* chemotaxis;
+* immune and cytokine signalling;
+* epithelial proliferation;
+* extracellular matrix interaction;
+* integrin signalling;
+* PI3K-Akt signalling;
+* Ras-related pathways.
+
+Taken together, these results do not support a strong global transcriptional effect of KCASH2 loss when comparing KO and WT samples directly. Instead, they show that tumor development is associated with broad transcriptional and functional changes in both genotypes. Hedgehog-related genes such as `Shh`, `Ptch2`, and `Sufu` were altered in tumor-versus-normal comparisons, but Hedgehog signalling was not significantly enriched as a complete pathway. Therefore, the role of Hedgehog in this dataset should be interpreted carefully.
+
+### 5. Visualization
+
+#### Quality control plots
+
+PCA plots were generated during quality control to evaluate the overall structure of the RNA-seq samples. The initial PCA was used to identify technical outliers, while the PCA after outlier removal was used to confirm that the cleaned dataset showed a more consistent sample distribution.
+
+This step was important because downstream differential expression analysis depends strongly on the quality and comparability of the samples.
+
+#### Differential expression plots
+
+Volcano plots were generated for each differential expression comparison. These plots summarize both the magnitude of expression change and the statistical significance of each gene.
+
+The direct genotype comparisons, `T_KO vs T_WT` and `N_KO vs N_WT`, showed few or no significant genes, which is consistent with the DEG summary table. In contrast, the paired tumor-versus-normal comparisons showed a much stronger differential expression signal, especially `T_WT vs N_WT`.
+
+Heatmaps were also generated for the most significant genes in the main tumor-versus-normal comparisons. These plots were used to visualize whether the selected DEGs showed coherent expression patterns across samples. The clustering structure helped confirm that the strongest separation was related to tumor versus normal tissue rather than to genotype alone.
+
+#### Functional enrichment plots
+
+GO and KEGG dotplots were generated from the enrichment results.
+
+GO dotplots were used to display the most enriched Biological Process terms, including processes related to chemotaxis, leukocyte migration, epithelial migration, tissue migration, and organic anion transport.
+
+KEGG dotplots were used to summarize pathway-level enrichment, including PI3K-Akt signalling, ECM-receptor interaction, cytokine-cytokine receptor interaction, integrin signalling, Ras signalling, and cancer-related pathway modules.
+
+A `compareCluster` GO plot was also generated to compare enriched biological processes across DEG contrasts. This visualization helped show that the paired tumor-versus-normal comparisons carried the strongest functional signal.
+
+#### Visualization summary
+
+Overall, the visualization results support the main conclusion of the analysis: the dominant signal in the dataset is the tumor-versus-normal transition, while the direct KO-versus-WT comparisons show limited transcriptomic differences.
+
+The figures also support the functional interpretation that tumor tissue is associated with changes in migration, immune and cytokine signalling, extracellular matrix interaction, epithelial behaviour, and cancer-related signalling pathways.
