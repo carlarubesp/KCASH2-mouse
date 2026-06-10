@@ -40,7 +40,7 @@ From these animals, two types of tissue samples were harvested for bulk RNA-sequ
 
 A major strength of this study design is its paired nature. Whenever possible, both tumor and normal tissues were extracted from the exact same animal. This allows us to control for inter-individual genetic background noise (baseline variability between different mice), significantly increasing the statistical power of the analysis.
 
-After initial quality control and the removal of technical outliers, the refined dataset used for the core paired analyses consists of **11 complete animal pairs** (6 complete KO pairs and 5 complete WT pairs), yielding a robust dataset for differential expression modeling.
+After quality control, the removal of two technical outliers, and the exclusion of unpaired samples lacking a matching animal ID, the refined dataset used for the core paired analyses consisted of 11 complete tumor-normal animal pairs (6 KO pairs and 5 WT pairs), yielding a robust dataset for differential expression modeling.
 
 ### Statistical contrasts
 
@@ -75,7 +75,7 @@ All packages are installed using **BiocManager**, the official package manager f
 
 Using BiocManager instead of base `install.packages()` ensures that all packages are mutually compatible with the current versions of R and Bioconductor, avoiding version conflicts between CRAN and Bioconductor dependencies. For packages hosted on CRAN, BiocManager calls `install.packages()` internally, so there is no difference in the result, only in the version management.
 
-This analysis uses **R version 4.6.0** and **Bioconductor version 3.23**.
+This analysis uses **R version 4.3.3** and **Bioconductor version 3.23**.
 
 #### 1.2 Packages
 

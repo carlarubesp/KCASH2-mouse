@@ -19,6 +19,7 @@ For the scripts to run correctly, please ensure the following folder structure i
 │   └── 05_GO_KEGG.R         # Functional enrichment analysis (GO and KEGG)
 ├── results/
 │   ├── deseq2/              # Extracted DEG tables (.csv) for all four statistical contrasts
+│   ├── functional/          # Enrichment tables and pathway screens
 │   └── plots/               # Generated figures (PCA, Volcano plots, heatmaps)
 ├── report/                  # Finished report on the process of the whole project
 ├── slides/
@@ -31,14 +32,14 @@ For the scripts to run correctly, please ensure the following folder structure i
 ## Environment Requirements
 
 The analysis was developed and validated under the following specifications:
-- **R version**: 4.6.0 (or compatible)
+- **R version**: 4.3.3 (or compatible)
 - **Bioconductor version**: 3.23
 - **Package manager**: BiocManager to ensure mutual compatibility between CRAN and Bioconductor libraries.
 
 &nbsp;
 
 ## Execution Instructions
-The scripts are designed to run sequentially. You must execute them in the following order (1 to 3):
+The scripts are designed to run sequentially. You must execute them in the following order (1 to 5):
 
 ### Step 1: Environment and library setup
 
