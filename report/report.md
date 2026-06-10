@@ -174,9 +174,9 @@ The bidirectional hierarchical clustering of the top 50 most significant DEGs fr
 To address the core project hypothesis, a dedicated, low-dimensional heatmap successfully isolated the key components of the Hedgehog pathway (*Gli1*, *Gli2*, *Gli3*, *Ptch1*, *Smo*, *Shh*, and *`KCASH2/Kctd21`*). The visual profile demonstrated a subtle, coordinated regulatory fine-tuning across the cohorts. Crucially, the expression levels of the suppressor `KCASH2` visually partitioned across the sub-clusters alongside changes in the transcription factors *Gli1* and *Gli3*, confirming the visual presence of pathway modulation within specific sample groups.
 
 
-#### 5. Functional Enrichment Analysis and Biological Interpretation
+### 5. Functional Enrichment Analysis and Biological Interpretation
 
-##### Input DEG lists
+#### Input DEG lists
 
 Functional enrichment analysis was performed using the DEG lists obtained from the official differential expression analysis. DEGs were defined using the same thresholds applied in the DESeq2 step: `padj < 0.05` and `|log2FC| ≥ 1`.
 
@@ -192,13 +192,13 @@ For this reason, the functional analysis focused mainly on the paired tumor-vers
 
 This indicates that the dominant transcriptional signal in the dataset is associated with tumor development rather than with a broad genotype effect of KCASH2 loss.
 
-##### Gene ID conversion and enrichment strategy
+#### Gene ID conversion and enrichment strategy
 
 Mouse gene symbols were converted into Entrez IDs using the `org.Mm.eg.db` annotation database. These converted gene lists were then used for Gene Ontology Biological Process enrichment and KEGG pathway analysis with `clusterProfiler`.
 
 GO enrichment was used to identify overrepresented biological processes, while KEGG enrichment was used to detect altered molecular pathways. In addition, a targeted screen was performed for pathways directly related to the project hypothesis, especially Hedgehog signaling, Wnt/β-catenin signaling, and inflammation-related genes.
 
-##### GO Biological Process enrichment
+#### GO Biological Process enrichment
 
 In the `T_KO vs N_KO` comparison, the most enriched GO Biological Process terms were mainly related to:
 
@@ -222,7 +222,7 @@ The `T_WT vs N_WT` comparison showed a similar functional pattern. The top enric
 
 Overall, the GO results show that both paired tumor-versus-normal comparisons are enriched for processes related to migration, immune response, tissue remodelling, and epithelial behaviour.
 
-##### KEGG pathway enrichment
+#### KEGG pathway enrichment
 
 KEGG enrichment analysis also supported the presence of cancer-relevant and microenvironment-related alterations.
 
@@ -248,7 +248,7 @@ In the `T_WT vs N_WT` comparison, KEGG enrichment highlighted pathways such as:
 
 These pathways are relevant in a tumor context because they are associated with cell survival, proliferation, migration, extracellular matrix remodelling, cytokine signalling, and interaction with the tumor microenvironment.
 
-##### Hedgehog and Wnt targeted analysis
+#### Hedgehog and Wnt targeted analysis
 
 Because the project focuses on the possible tumor suppressor role of KCASH2 and its relationship with Hedgehog signaling, Hedgehog-related genes were examined separately.
 
@@ -258,7 +258,7 @@ This shows that individual Hedgehog-associated genes change during the tumor-ver
 
 The targeted pathway screen also detected several Wnt/β-catenin-related genes among the DEGs, especially in the tumor-versus-normal comparisons. These included genes such as `Axin2`, `Lef1`, `Wnt7b`, `Wnt5b`, `Fzd10`, `Tcf7`, `Dkk2`, `Dkk3`, `Wnt3`, `Wnt5a`, `Fzd8`, and `Fzd3`. However, after multiple-testing correction, Wnt/β-catenin was not significantly enriched either. Therefore, Wnt-related genes are present among the DEGs, but the pathway-level result should be interpreted cautiously.
 
-##### Functional interpretation
+#### Functional interpretation
 
 Overall, the functional analysis suggests that the dominant biological signal in this dataset is the tumor-versus-normal transition. The direct KO-versus-WT comparisons showed no or very few DEGs, while both paired tumor-versus-normal comparisons produced large DEG sets and strong functional enrichment.
 
@@ -275,6 +275,5 @@ The enriched GO and KEGG results point mainly to:
 
 Taken together, these results do not support a strong global transcriptional effect of KCASH2 loss when comparing KO and WT samples directly. Instead, they show that tumor development is associated with broad transcriptional and functional changes in both genotypes. Hedgehog-related genes such as `Shh`, `Ptch2`, and `Sufu` were altered in tumor-versus-normal comparisons, but Hedgehog signalling was not significantly enriched as a complete pathway. Therefore, the role of Hedgehog in this dataset should be interpreted carefully.
 
-##### Supporting visualization of enrichment results
-A compareCluster GO plot was generated to compare enriched biological processes across DEG contrasts, providing additional visual support for the functional patterns observed between tumor-versus-normal comparisons.
-A `compareCluster` GO plot was also generated to compare enriched biological processes across DEG contrasts. This visualization helped show that the paired tumor-versus-normal comparisons carried the strongest functional signal.
+#### Supporting visualization of enrichment results
+A `compareCluster` GO plot was generated to compare enriched biological processes across DEG contrasts, providing additional visual support for the functional patterns observed between tumor-versus-normal comparisons.
