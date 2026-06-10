@@ -276,4 +276,4 @@ The enriched GO and KEGG results point mainly to:
 Taken together, these results do not support a strong global transcriptional effect of KCASH2 loss when comparing KO and WT samples directly. Instead, they show that tumor development is associated with broad transcriptional and functional changes in both genotypes. Hedgehog-related genes such as `Shh`, `Ptch2`, and `Sufu` were altered in tumor-versus-normal comparisons, but Hedgehog signalling was not significantly enriched as a complete pathway. Therefore, the role of Hedgehog in this dataset should be interpreted carefully.
 
 #### Supporting visualization of enrichment results
-A `compareCluster` GO plot was generated to compare enriched biological processes across DEG contrasts, providing additional visual support for the functional patterns observed between tumor-versus-normal comparisons.
+A `compareCluster` GO plot was generated to compare enriched biological processes across DEG contrasts.
