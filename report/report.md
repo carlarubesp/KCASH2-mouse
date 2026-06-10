@@ -300,9 +300,3 @@ GO dotplots were used to display the most enriched Biological Process terms, inc
 KEGG dotplots were used to summarize pathway-level enrichment, including PI3K-Akt signalling, ECM-receptor interaction, cytokine-cytokine receptor interaction, integrin signalling, Ras signalling, and cancer-related pathway modules.
 
 A `compareCluster` GO plot was also generated to compare enriched biological processes across DEG contrasts. This visualization helped show that the paired tumor-versus-normal comparisons carried the strongest functional signal.
-
-#### Visualization summary
-
-Overall, the visualization results support the main conclusion of the analysis: the dominant signal in the dataset is the tumor-versus-normal transition, while the direct KO-versus-WT comparisons show limited transcriptomic differences.
-
-The figures also support the functional interpretation that tumor tissue is associated with changes in migration, immune and cytokine signalling, extracellular matrix interaction, epithelial behaviour, and cancer-related signalling pathways.
