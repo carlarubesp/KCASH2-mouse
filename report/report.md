@@ -275,28 +275,6 @@ The enriched GO and KEGG results point mainly to:
 
 Taken together, these results do not support a strong global transcriptional effect of KCASH2 loss when comparing KO and WT samples directly. Instead, they show that tumor development is associated with broad transcriptional and functional changes in both genotypes. Hedgehog-related genes such as `Shh`, `Ptch2`, and `Sufu` were altered in tumor-versus-normal comparisons, but Hedgehog signalling was not significantly enriched as a complete pathway. Therefore, the role of Hedgehog in this dataset should be interpreted carefully.
 
-### 6. Visualization
-
-#### Quality control plots
-
-PCA plots were generated during quality control to evaluate the overall structure of the RNA-seq samples. The initial PCA was used to identify technical outliers, while the PCA after outlier removal was used to confirm that the cleaned dataset showed a more consistent sample distribution.
-
-This step was important because downstream differential expression analysis depends strongly on the quality and comparability of the samples.
-
-#### Differential expression plots
-
-Volcano plots were generated for each differential expression comparison. These plots summarize both the magnitude of expression change and the statistical significance of each gene.
-
-The direct genotype comparisons, `T_KO vs T_WT` and `N_KO vs N_WT`, showed few or no significant genes, which is consistent with the DEG summary table. In contrast, the paired tumor-versus-normal comparisons showed a much stronger differential expression signal, especially `T_WT vs N_WT`.
-
-Heatmaps were also generated for the most significant genes in the main tumor-versus-normal comparisons. These plots were used to visualize whether the selected DEGs showed coherent expression patterns across samples. The clustering structure helped confirm that the strongest separation was related to tumor versus normal tissue rather than to genotype alone.
-
-#### Functional enrichment plots
-
-GO and KEGG dotplots were generated from the enrichment results.
-
-GO dotplots were used to display the most enriched Biological Process terms, including processes related to chemotaxis, leukocyte migration, epithelial migration, tissue migration, and organic anion transport.
-
-KEGG dotplots were used to summarize pathway-level enrichment, including PI3K-Akt signalling, ECM-receptor interaction, cytokine-cytokine receptor interaction, integrin signalling, Ras signalling, and cancer-related pathway modules.
-
+##### Supporting visualization of enrichment results
+A compareCluster GO plot was generated to compare enriched biological processes across DEG contrasts, providing additional visual support for the functional patterns observed between tumor-versus-normal comparisons.
 A `compareCluster` GO plot was also generated to compare enriched biological processes across DEG contrasts. This visualization helped show that the paired tumor-versus-normal comparisons carried the strongest functional signal.
